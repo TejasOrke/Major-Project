@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = axios.create({ baseURL: "http://localhost:5000" });
+const API = axios.create({ baseURL: "http://localhost:5000/api" }); // Adjusted base URL
 
 // Attach token to every request
 API.interceptors.request.use((req) => {
@@ -9,8 +9,17 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-export const loginUser = (data) => API.post("/api/auth/login", data);
-export const getStudents = () => API.get("/api/students");
-export const getStudentById = (id) => API.get(`/api/students/${id}`);
-export const getLORs = () => API.get("/api/lors");
+// Authentication APIs
+export const loginUser = (data) => API.post("/auth/login", data);
+export const requestRegister = (data) => API.post("/auth/request-registration", data);
 
+// Student APIs
+export const getStudents = () => API.get("/students");
+export const getStudentById = (id) => API.get(`/students/${id}`);
+
+// LOR APIs
+export const getLORs = () => API.get("/lors");
+
+// New: Approve or Reject Registration
+export const approveUser = (email) => API.get(`/approve-user?email=${encodeURIComponent(email)}`);
+export const rejectUser = (email) => API.get(`/reject-user?email=${encodeURIComponent(email)}`);

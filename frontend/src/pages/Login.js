@@ -11,23 +11,63 @@ export default function Login() {
     e.preventDefault();
     try {
       const { data } = await loginUser({ email, password });
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userRole", data.role);
+
+      console.log("Login response:", data);
+
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      console.log("Stored user:", localStorage.getItem("user"));
+      console.log("Stored token:", localStorage.getItem("token"));
+
       navigate("/dashboard");
     } catch (error) {
+      console.error("Login error:", error);
       alert("Invalid Credentials");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        <form onSubmit={handleLogin}>
-          <input type="email" placeholder="Email" className="w-full mb-2 p-2 border" onChange={(e) => setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password" className="w-full mb-2 p-2 border" onChange={(e) => setPassword(e.target.value)} required />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
+    <div className="flex items-center justify-center min-h-screen bg-gray-900">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+        <h2 className="text-2xl font-bold text-white mb-4 text-center">Login</h2>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full p-3 border border-gray-700 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 border border-gray-700 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-lg shadow-md transition-all transform hover:scale-105"
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </button>
         </form>
+
+        {/* Register Button */}
+        <div className="text-center mt-4">
+          <p className="text-gray-400">Don't have an account?</p>
+          <button
+            onClick={() => navigate("/register-request")}
+            className="mt-2 w-full bg-green-600 hover:bg-green-500 text-white p-3 rounded-lg shadow-md transition-all transform hover:scale-105"
+          >
+            Request Access
+          </button>
+        </div>
       </div>
     </div>
   );

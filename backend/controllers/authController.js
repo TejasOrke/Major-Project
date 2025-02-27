@@ -1,25 +1,143 @@
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const LORRequest = require("../models/LORRequest");
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcryptjs");
+const PendingUser = require("../models/PendingUser"); // Assuming model path
 
-// User Registration (Admin Only)
-exports.registerUser = async (req, res) => {
-    const { name, email, password, role } = req.body;
+const ADMIN_EMAIL = "tejasorke@gmail.com";
+
+// Configure the mail transporter using a fixed admin email
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { 
+        user: ADMIN_EMAIL,  // Admin email as sender
+        pass: process.env.ADMIN_PASS // App password (not email password)
+    }
+});
+
+// Request Registration - User requests access
+exports.requestRegistration = async (req, res) => {
+    const { email } = req.body;
 
     try {
-        let user = await User.findOne({ email });
-        if (user) return res.status(400).json({ message: "User already exists" });
+        let existingRequest = await PendingUser.findOne({ email });
+        if (existingRequest) {
+            return res.status(400).json({ message: "Request already submitted" });
+        }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user = new User({ name, email, password: hashedPassword, role });
+        await new PendingUser({ email }).save();
 
-        await user.save();
-        res.json({ message: "User registered successfully" });
+        // Admin approval links
+        const approveLink = `http://localhost:5000/api/approve-user?email=${encodeURIComponent(email)}`;
+        const rejectLink = `http://localhost:5000/api/reject-user?email=${encodeURIComponent(email)}`;
+
+        // Email content for Admin
+        const emailHtml = `
+            <p>A new user has requested access: <strong>${email}</strong></p>
+            <p>Click below to approve or reject:</p>
+            <a href="${approveLink}" style="display:inline-block;padding:10px;background:green;color:white;text-decoration:none;border-radius:5px;margin-right:10px;">Approve</a>
+            <a href="${rejectLink}" style="display:inline-block;padding:10px;background:red;color:white;text-decoration:none;border-radius:5px;">Reject</a>
+        `;
+
+        // Send email to the Admin
+        await transporter.sendMail({
+            from: ADMIN_EMAIL,
+            to: ADMIN_EMAIL, // Admin receives the request
+            subject: "New Registration Request",
+            html: emailHtml
+        });
+
+        res.json({ message: "Request submitted. Admin will review your request." });
+
     } catch (error) {
+        console.error("Request Registration Error:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
+
+// Approve User - Admin approves the registration
+exports.approveUser = async (req, res) => {
+    const { email } = req.query;
+
+    try {
+        const pendingUser = await PendingUser.findOne({ email });
+        if (!pendingUser) {
+            return res.status(400).send("No pending request found");
+        }
+
+        // Generate random user details
+        const name = email.split("@")[0];  // Extract username from email
+        const password = Math.random().toString(36).slice(-8); // Generate random password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create user in database
+        const newUser = new User({ name, email, password: hashedPassword, role: "faculty" });
+        await newUser.save();
+        await PendingUser.deleteOne({ email });
+
+        // Send login credentials to the user
+        await transporter.sendMail({
+            from: ADMIN_EMAIL, // Admin email as sender
+            to: email,
+            subject: "Your Account Details",
+            text: `Your account has been approved.\n\nLogin details:\nEmail: ${email}\nPassword: ${password}\n\nPlease change your password after logging in.`
+        });
+
+        // Notify admin about the approval
+        await transporter.sendMail({
+            from: ADMIN_EMAIL,
+            to: ADMIN_EMAIL, // Admin receives the approval notification
+            subject: "User Approved",
+            text: `The user with email ${email} has been approved.`
+        });
+
+        res.json({ message: "User approved and credentials sent." });
+
+    } catch (error) {
+        console.error("Approve User Error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// Reject User - Admin rejects the registration
+exports.rejectUser = async (req, res) => {
+    const { email } = req.query;
+
+    try {
+        const pendingUser = await PendingUser.findOne({ email });
+        if (!pendingUser) {
+            return res.status(404).send("No pending request found");
+        }
+
+        // Remove from pending users list
+        await PendingUser.deleteOne({ email });
+
+        // Notify user about rejection
+        await transporter.sendMail({
+            from: ADMIN_EMAIL, // Use the admin email to send
+            to: email,
+            subject: "Registration Request Rejected",
+            text: "Your request to register has been rejected by the admin."
+        });
+
+        // Notify admin about the rejection
+        await transporter.sendMail({
+            from: ADMIN_EMAIL,
+            to: ADMIN_EMAIL,
+            subject: "User Request Rejected",
+            text: `The user with email ${email} has been rejected.`
+        });
+
+        res.send("User request rejected.");
+
+    } catch (error) {
+        console.error("Reject User Error:", error);
+        res.status(500).send("Server error");
+    }
+};
+
+
 
 // User Login
 exports.loginUser = async (req, res) => {
@@ -33,7 +151,7 @@ exports.loginUser = async (req, res) => {
         if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-        res.json({ token, role: user.role });
+        res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
     } catch (error) {
         res.status(500).json({ message: "Server error" });
     }
