@@ -3,11 +3,15 @@ require("dotenv").config({ path: "./.env" }); // Explicitly load .env file
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const path = require("path");
+const fs = require("fs");
 
 // Import routes
 const authRoutes = require("./routes/authRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const lorRoutes = require("./routes/lorRoutes");
+const internshipRoutes = require("./routes/internshipRoutes");
+const placementRoutes = require("./routes/placementRoutes");
 
 const app = express();
 
@@ -19,11 +23,21 @@ app.use(cors({
   credentials: true
 }));
 
-app.use("/uploads", express.static("uploads"));
-
+// Register API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/lors", lorRoutes);
+app.use("/api/internships", internshipRoutes);
+app.use("/api/placements", placementRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Make sure the uploads directory exists
+const dir = './uploads/offerLetters';
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir, { recursive: true });
+}
 
 // MongoDB Connection with Better Error Handling
 mongoose.connect(process.env.MONGO_URI, {

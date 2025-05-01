@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getStudentById } from "../api/api";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { FaBriefcase } from "react-icons/fa"; // Import the icon
 
 export default function StudentDetails() {
   const { id } = useParams();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate(); // Add this hook
 
   // Dropdown states
   const [showAdmitCard, setShowAdmitCard] = useState(false);
@@ -16,11 +19,22 @@ export default function StudentDetails() {
   const [showPlacement, setShowPlacement] = useState(false);
 
   useEffect(() => {
+    // Get the logged-in user for role check
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    setUser(storedUser);
+  
     async function fetchData() {
       try {
         setLoading(true);
         const { data } = await getStudentById(id);
-        setStudent(data);
+        
+        // Make sure internships property exists
+        const studentData = {
+          ...data,
+          internships: data.internships || []
+        };
+        
+        setStudent(studentData);
       } catch (err) {
         console.error("Error fetching student:", err);
         setError(err.message);
@@ -73,32 +87,74 @@ export default function StudentDetails() {
             )}
           </div>
 
-          {/* Internship Details Dropdown */}
+          {/* Internship Details Dropdown with Add Internship Button for Admins */}
           <div className="mt-4 bg-gray-800 shadow-md rounded-lg">
-            <button
-              onClick={() => setShowInternship(!showInternship)}
-              className="w-full text-left p-3 font-semibold text-lg bg-green-600 text-white rounded-t-lg flex justify-between items-center hover:bg-green-700 transition"
-            >
-              Internship Details
-              <span>{showInternship ? "▲" : "▼"}</span>
-            </button>
+            <div className="flex flex-col md:flex-row md:items-center justify-between bg-green-600 rounded-t-lg">
+              <button
+                onClick={() => setShowInternship(!showInternship)}
+                className="text-left p-3 font-semibold text-lg text-white flex-grow hover:bg-green-700 transition"
+              >
+                Internship Details
+                <span className="ml-2">{showInternship ? "▲" : "▼"}</span>
+              </button>
+              
+              {/* Add Internship Button - Only visible to admins */}
+              {user?.role === "admin" && (
+                <button
+                  onClick={() => navigate(`/add-internship/${student._id}`)}
+                  className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 m-2 rounded-md font-medium flex items-center gap-2"
+                >
+                  <FaBriefcase /> Add Internship
+                </button>
+              )}
+            </div>
+            
             {showInternship && (
-              <div className="p-4 border-t border-gray-700 bg-gray-900">
-                {student.internships && student.internships.length > 0 ? (
-                  <ul>
-                    {student.internships.map((internship, index) => (
-                      <li key={index} className="p-3 border-b border-gray-700">
-                        <strong>Company:</strong> {internship.company} <br />
-                        <strong>Duration:</strong> {internship.duration} <br />
-                        <strong>Status:</strong> {internship.status}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-400">No Internship Records</p>
-                )}
+  <div className="p-4 border-t border-gray-700 bg-gray-900">
+    {student.internships && student.internships.length > 0 ? (
+      <ul className="space-y-4">
+        {student.internships.map((internship, index) => (
+          <li key={index} className="bg-gray-800 p-4 rounded-md shadow">
+            <div className="flex justify-between">
+              <h3 className="font-semibold text-lg">{internship.company}</h3>
+              <span className={`px-2 py-1 text-xs rounded-full ${
+                internship.status === 'Completed' ? 'bg-green-700' : 
+                internship.status === 'Ongoing' ? 'bg-blue-600' : 
+                internship.status === 'Terminated' ? 'bg-red-700' : 'bg-yellow-600'
+              }`}>
+                {internship.status}
+              </span>
+            </div>
+            
+            <p className="text-gray-300 mt-2">
+              <strong>Position:</strong> {internship.position}
+            </p>
+            
+            <p className="text-gray-300">
+              <strong>Duration:</strong> {new Date(internship.startDate).toLocaleDateString()} - 
+              {internship.endDate ? new Date(internship.endDate).toLocaleDateString() : 'Present'}
+            </p>
+            
+            {internship.stipend && (
+              <p className="text-gray-300">
+                <strong>Stipend:</strong> ₹{internship.stipend}/month
+              </p>
+            )}
+            
+            {internship.description && (
+              <div className="mt-2">
+                <strong>Description:</strong> 
+                <p className="text-gray-400 mt-1">{internship.description}</p>
               </div>
             )}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className="text-gray-400">No Internship Records</p>
+    )}
+  </div>
+)}
           </div>
 
           {/* Placement Details Dropdown */}
@@ -109,6 +165,14 @@ export default function StudentDetails() {
             >
               Placement Details
               <span>{showPlacement ? "▲" : "▼"}</span>
+{user?.role === "admin" && (
+  <button
+    onClick={() => navigate(`/add-placement/${student._id}`)}
+    className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 m-2 rounded-md font-medium flex items-center gap-2"
+  >
+    <FaBriefcase /> Add Placement
+  </button>
+)}
             </button>
             {showPlacement && (
               <div className="p-4 border-t border-gray-700 bg-gray-900">
