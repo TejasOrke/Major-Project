@@ -10,12 +10,16 @@ export default function RegisterRequest() {
         e.preventDefault();
         setMessage(null);
         setError(null);
-
+    
         try {
             const response = await requestRegister({ email });
             setMessage(response.data.message);
         } catch (err) {
-            setError(err.response?.data?.message || "Something went wrong");
+            if (err.response?.status === 400 && err.response?.data?.message === "User already exists") {
+                setError("This email is already registered.");
+            } else {
+                setError(err.response?.data?.message || "Something went wrong");
+            }
         }
     };
 

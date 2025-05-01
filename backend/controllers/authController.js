@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const PendingUser = require("../models/PendingUser"); // Assuming model path
 
-const ADMIN_EMAIL = "tejasorke@gmail.com";
+const ADMIN_EMAIL = "vedantonkar27@gmail.com";
 
 // Configure the mail transporter using a fixed admin email
 const transporter = nodemailer.createTransport({
@@ -21,6 +21,12 @@ exports.requestRegistration = async (req, res) => {
     const { email } = req.body;
 
     try {
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+
         let existingRequest = await PendingUser.findOne({ email });
         if (existingRequest) {
             return res.status(400).json({ message: "Request already submitted" });
@@ -29,10 +35,9 @@ exports.requestRegistration = async (req, res) => {
         await new PendingUser({ email }).save();
 
         // Admin approval links
-        const approveLink = `http://localhost:5000/api/approve-user?email=${encodeURIComponent(email)}`;
-        const rejectLink = `http://localhost:5000/api/reject-user?email=${encodeURIComponent(email)}`;
+        const approveLink = `http://localhost:3000/approve-user?email=${encodeURIComponent(email)}`;
+        const rejectLink = `http://localhost:3000/reject-user?email=${encodeURIComponent(email)}`;
 
-        // Email content for Admin
         const emailHtml = `
             <p>A new user has requested access: <strong>${email}</strong></p>
             <p>Click below to approve or reject:</p>
@@ -58,45 +63,55 @@ exports.requestRegistration = async (req, res) => {
 
 // Approve User - Admin approves the registration
 exports.approveUser = async (req, res) => {
-    const { email } = req.query;
+    const { email } = req.query; // Extract email from query parameters
 
     try {
+        // Check if the email exists in the pending users collection
         const pendingUser = await PendingUser.findOne({ email });
         if (!pendingUser) {
-            return res.status(400).send("No pending request found");
+            return res.status(400).json({ message: "No pending request found for this email." });
         }
 
         // Generate random user details
-        const name = email.split("@")[0];  // Extract username from email
-        const password = Math.random().toString(36).slice(-8); // Generate random password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const name = email.split("@")[0]; // Use the part before '@' as the name
+        const password = Math.random().toString(36).slice(-8); // Generate a random password
+        const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
 
-        // Create user in database
-        const newUser = new User({ name, email, password: hashedPassword, role: "faculty" });
-        await newUser.save();
-        await PendingUser.deleteOne({ email });
-
-        // Send login credentials to the user
-        await transporter.sendMail({
-            from: ADMIN_EMAIL, // Admin email as sender
-            to: email,
-            subject: "Your Account Details",
-            text: `Your account has been approved.\n\nLogin details:\nEmail: ${email}\nPassword: ${password}\n\nPlease change your password after logging in.`
+        // Create a new user in the database
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role: "faculty", // Assign the role as 'faculty'
         });
+        await newUser.save();
 
-        // Notify admin about the approval
+        // Remove the user from the pending users collection
+        // await PendingUser.deleteOne({ email });
+
+        // Send login credentials to the user via email
         await transporter.sendMail({
             from: ADMIN_EMAIL,
-            to: ADMIN_EMAIL, // Admin receives the approval notification
-            subject: "User Approved",
-            text: `The user with email ${email} has been approved.`
+            to: `${email}`
+,
+            subject: "Your Account Details",
+            text: `Your account has been approved.\n\nLogin details:\nEmail: ${email}\nPassword: ${password}\n\nPlease change your password after logging in.`,
         });
 
-        res.json({ message: "User approved and credentials sent." });
+        await PendingUser.deleteOne({ email });
+        // Notify the admin about the approval
+        await transporter.sendMail({
+            from: ADMIN_EMAIL,
+            to: ADMIN_USER,
+            subject: "User Approved",
+            text: `The user with email ${email} has been approved.`,
+        });
 
+        // Respond with a success message
+        res.json({ message: "User approved successfully and credentials sent." });
     } catch (error) {
         console.error("Approve User Error:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error occurred while approving the user." });
     }
 };
 

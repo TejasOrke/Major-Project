@@ -79,7 +79,7 @@ export default function LORList() {
                     <td className="border border-gray-700 p-2">
                       {lor.lorDocument ? (
                         <a
-                          href={`http://localhost:5000/${lor.lorDocument}`}
+                          href={`http://localhost:5000/${lor.lorDocument}`}  // Fixed string template syntax
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-400 hover:underline"

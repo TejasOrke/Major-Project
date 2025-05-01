@@ -6,13 +6,15 @@ import StudentDetails from "./pages/StudentDetails";
 import LORList from "./pages/LORList";  // Add this import
 import ProtectedRoute from "./components/ProtectedRoute";
 import RegisterRequest from "./pages/RegisterRequest";
+import ApproveUser from "./pages/ApproveUser";
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route path="/register-request" element={<RegisterRequest />} />
+        <Route path="/approve-user" element={<ApproveUser />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/students" element={<StudentList />} />
