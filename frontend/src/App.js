@@ -12,6 +12,9 @@ import AddInternship from "./pages/AddInternship";
 import Internships from "./pages/Internships";
 import Placements from "./pages/Placements";
 import AddPlacement from "./pages/AddPlacement";
+import LORTemplates from "./pages/LORTemplates";
+import LORDetail from "./pages/LORDetail";
+import SmartLORGenerator from "./pages/SmartLORGenerator";
 export default function App() {
   return (
     <Router>
@@ -20,6 +23,9 @@ export default function App() {
         <Route path="/register-request" element={<RegisterRequest />} />
         <Route path="/approve-user" element={<ApproveUser />} />
         <Route element={<ProtectedRoute />}>
+        <Route path="/smart-lor/:studentId" element={<SmartLORGenerator />} />
+        <Route path="/lor-templates" element={<LORTemplates />} />
+<Route path="/lor/:id" element={<LORDetail />} />
         <Route path="/add-placement" element={<AddPlacement />} />
 <Route path="/add-placement/:studentId" element={<AddPlacement />} />
           <Route path="/dashboard" element={<Dashboard />} />

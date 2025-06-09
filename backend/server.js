@@ -12,12 +12,14 @@ const studentRoutes = require("./routes/studentRoutes");
 const lorRoutes = require("./routes/lorRoutes");
 const internshipRoutes = require("./routes/internshipRoutes");
 const placementRoutes = require("./routes/placementRoutes");
+const lorTemplateRoutes = require('./routes/lorTemplateRoutes');
+const aiLorRoutes = require('./routes/aiLorRoutes');
 
+// Initialize Express app - MOVED UP before using it
 const app = express();
 
+// Middleware
 app.use(express.json());
-
-// Allow only specific frontend origins (optional security improvement)
 app.use(cors({
   origin: process.env.CLIENT_ORIGIN || "*",  // Use .env for frontend origin
   credentials: true
@@ -29,15 +31,19 @@ app.use("/api/students", studentRoutes);
 app.use("/api/lors", lorRoutes);
 app.use("/api/internships", internshipRoutes);
 app.use("/api/placements", placementRoutes);
+app.use('/api/lor-templates', lorTemplateRoutes);
+app.use('/api/ai-lors', aiLorRoutes); // Moved this here after app is initialized
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Make sure the uploads directory exists
-const dir = './uploads/offerLetters';
-if (!fs.existsSync(dir)){
+// Create necessary directories if they don't exist
+const dirs = ['./uploads/offerLetters', './uploads/lors', './assets'];
+dirs.forEach(dir => {
+  if (!fs.existsSync(dir)){
     fs.mkdirSync(dir, { recursive: true });
-}
+  }
+});
 
 // MongoDB Connection with Better Error Handling
 mongoose.connect(process.env.MONGO_URI, {

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getStudentById } from "../api/api";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { FaBriefcase } from "react-icons/fa"; // Import the icon
+import { FaBriefcase, FaRobot } from "react-icons/fa"; // Import the icons
 
 export default function StudentDetails() {
   const { id } = useParams();
@@ -97,6 +97,14 @@ export default function StudentDetails() {
                 Internship Details
                 <span className="ml-2">{showInternship ? "▲" : "▼"}</span>
               </button>
+
+                <button
+    onClick={() => navigate(`/smart-lor/${student._id}`)}
+    className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
+  >
+    <FaRobot className="mr-2" />
+    Smart LOR
+  </button>
               
               {/* Add Internship Button - Only visible to admins */}
               {user?.role === "admin" && (
