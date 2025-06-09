@@ -24,7 +24,7 @@ const StudentSchema = new mongoose.Schema({
             purpose: String,
             university: String,
             program: String,
-            status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+            status: { type: String, enum: ["draft", "approved", "rejected"], default: "draft" },
             remarks: String,
             issuedAt: { type: Date, default: Date.now }
         }

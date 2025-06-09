@@ -71,36 +71,51 @@ const analyzeStudent = async () => {
 };
 
   const handleGenerateLOR = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  
+  try {
+    setGenerating(true);
+    setError(null);
     
-    try {
-      setGenerating(true);
-      setError(null);
-      
-      // Validate form
-      if (!formData.purpose || !formData.university || !formData.program) {
-        setError("Please fill all required fields");
-        setGenerating(false);
-        return;
-      }
-      
-      const response = await generateSmartLOR({
-        studentId,
-        purpose: formData.purpose,
-        university: formData.university,
-        program: formData.program
-      });
-      
-      // Navigate to LOR detail page
-      navigate(`/lor/${response.data.lorRequest._id}`);
-      
-    } catch (err) {
-      console.error("Error generating LOR:", err);
-      setError("Failed to generate LOR");
+    // Validate form
+    if (!formData.purpose || !formData.university || !formData.program) {
+      setError("Please fill all required fields");
       setGenerating(false);
+      return;
     }
-  };
-
+    
+    const response = await generateSmartLOR({
+      studentId,
+      purpose: formData.purpose,
+      university: formData.university,
+      program: formData.program
+    });
+    
+    // Navigate to LOR detail page
+    navigate(`/lor/${response.data.lorRequest._id}`);
+    
+  } catch (err) {
+    console.error("Error generating LOR:", err);
+    
+    // More specific error messages based on the error type
+    if (err.message === 'Network Error') {
+      setError("Network error: Please check your connection and try again");
+    } else if (err.response) {
+      // Server responded with an error status code
+      const serverMessage = err.response.data.message || err.response.statusText;
+      setError(`Server error: ${serverMessage}`);
+      
+      // If Python execution failed, provide more context
+      if (serverMessage.includes("Python") || serverMessage.includes("script")) {
+        setError(`AI generation error: ${serverMessage}. The AI system might be temporarily unavailable.`);
+      }
+    } else {
+      setError("Failed to generate LOR. Please try again later.");
+    }
+    
+    setGenerating(false);
+  }
+};
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">

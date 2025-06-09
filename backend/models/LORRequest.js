@@ -1,50 +1,93 @@
-// models/LORRequest.js - update existing model
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const LORRequestSchema = new mongoose.Schema({
+const lorRequestSchema = new Schema({
   student: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", 
+    type: Schema.Types.ObjectId,
+    ref: 'Student',
+    required: true
+  },
+  requestedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   purpose: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   university: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   program: {
     type: String,
-    required: true
-  },
-  deadline: {
-    type: Date,
-    required: true
+    required: true,
+    trim: true
   },
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected", "completed"],
-    default: "pending"
+    enum: ['draft', 'pending', 'approved', 'rejected'],
+    default: 'draft'
   },
-  remarks: {
-    type: String
+  requestDate: {
+    type: Date,
+    default: Date.now
   },
-  generatedContent: {
-    type: String
+  approvalDate: {
+    type: Date
   },
   templateUsed: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "LORTemplate"
+    type: Schema.Types.ObjectId,
+    ref: 'LORTemplate'
   },
-  signedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
+  generatedContent: {
+    type: String,
+    required: true
   },
-  finalPDF: {
-    type: String // Path to generated PDF file
+  comments: [{
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    text: {
+      type: String,
+      required: true
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  isAIGenerated: {
+    type: Boolean,
+    default: false
+  },
+  aiRecommendations: [{
+    type: String
+  }],
+  metadata: {
+    letterFormat: String,
+    wordCount: Number,
+    toneScore: Number
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model("LORRequest", LORRequestSchema);
+// Pre-save middleware to calculate word count
+lorRequestSchema.pre('save', function(next) {
+  if (this.isModified('generatedContent')) {
+    // Calculate word count
+    const wordCount = this.generatedContent.split(/\s+/).length;
+    
+    if (!this.metadata) {
+      this.metadata = {};
+    }
+    
+    this.metadata.wordCount = wordCount;
+  }
+  next();
+});
+
+module.exports = mongoose.model('LORRequest', lorRequestSchema);
