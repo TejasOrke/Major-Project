@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { addStudent } from "../api/api";
+import { addStudent } from "../api";
 
 
 export default function AddStudent() {
@@ -12,6 +11,8 @@ export default function AddStudent() {
     rollNo: "",
     email: "",
     department: "",
+    cgpa: "",
+    skills: "" // comma separated input
   });
   const [message, setMessage] = useState("");
   const [user, setUser] = useState(null);
@@ -36,7 +37,7 @@ export default function AddStudent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await addStudent(formData);
+  await addStudent(formData);
       setMessage("Student added successfully!");
       setTimeout(() => navigate("/students"), 2000); // Redirect after success
     } catch (error) {
@@ -124,6 +125,31 @@ export default function AddStudent() {
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">CGPA (0-10)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10"
+                  name="cgpa"
+                  placeholder="e.g. 8.45"
+                  value={formData.cgpa}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Skills (comma separated)</label>
+                <input
+                  type="text"
+                  name="skills"
+                  placeholder="e.g. Java, React, MongoDB"
+                  value={formData.skills}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <button 

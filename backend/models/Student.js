@@ -5,12 +5,18 @@ const StudentSchema = new mongoose.Schema({
     rollNo: { type: String, unique: true, required: true },
     email: { type: String, required: true },
     department: { type: String, required: true },
-    admitCard: { type: String }, // File path for admit card
+    cgpa: { type: Number, min: 0, max: 10 },
+    skills: { type: [String], default: [] },
+    admitCard: { type: String }, // File path for admit card (stored under uploads)
     internships: [
         {
             company: String,
-            duration: String,
-            status: String // Pending, Completed, Ongoing
+            position: String,
+            startDate: Date,
+            endDate: Date,
+            description: String,
+            stipend: Number,
+            status: { type: String, enum: ["Applied", "Ongoing", "Completed", "Terminated"] }
         }
     ],
     placement: {

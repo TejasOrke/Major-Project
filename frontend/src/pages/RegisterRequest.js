@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {requestRegister} from "../api/api";
+import {requestRegister} from "../api";
 
 export default function RegisterRequest() {
     const [email, setEmail] = useState("");

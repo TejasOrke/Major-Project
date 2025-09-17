@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { addInternship, getStudentById } from "../api/api";
+import { addInternship, getStudentById } from "../api";
 
 export default function AddInternship() {
   const { studentId } = useParams();

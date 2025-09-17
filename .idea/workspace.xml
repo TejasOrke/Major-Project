@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="81fd4adc-b6d8-4bf8-884f-a075f1c33c7a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/controllers/aiLorController.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/controllers/aiLorController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/aiLorRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/aiLorRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/SmartLORGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SmartLORGenerator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/lor_recommendation_ai.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/lor_recommendation_ai.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 7
+}]]></component>
+  <component name="ProjectId" id="32mqLTs4ACCte2RS1O7jJnU20Fu" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "fault1",
+    "settings.editor.selected.configurable": "com.poratu.idea.plugins.tomcat.setting.TomcatServersConfigurable"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="81fd4adc-b6d8-4bf8-884f-a075f1c33c7a" name="Changes" comment="" />
+      <created>1758036043092</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1758036043092</updated>
+    </task>
+    <servers />
+  </component>
+</project>

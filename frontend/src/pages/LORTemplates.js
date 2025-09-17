@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { getAllTemplates, createTemplate, updateTemplate, deleteTemplate } from "../api/api";
+import { getAllTemplates, createTemplate, updateTemplate, deleteTemplate } from "../api";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 
 export default function LORTemplates() {

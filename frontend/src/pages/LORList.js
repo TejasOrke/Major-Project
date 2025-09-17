@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getLORs } from "../api/api";
+import { getLORs } from "../api";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 

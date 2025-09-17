@@ -1,72 +1,80 @@
 const express = require("express");
 const Student = require("../models/Student");
+const Internship = require("../models/Internship");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Get all students
+// GET /api/students - list (basic fields for table)
 router.get("/", authMiddleware, async (req, res) => {
-    try {
-        const students = await Student.find();
-        res.json(students);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
-    }
+  try {
+    const students = await Student.find().select("name rollNo email cgpa skills");
+    res.json(students);
+  } catch (error) {
+    console.error('[Students] List error', error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-// Get a specific student
+// GET /api/students/:id - detailed record with embedded internships from separate collection
 router.get("/:id", authMiddleware, async (req, res) => {
-    try {
-        const student = await Student.findById(req.params.id);
-        if (!student) return res.status(404).json({ message: "Student not found" });
-        res.json(student);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
-    }
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
+
+    const internships = await Internship.find({ studentId: req.params.id }).lean();
+
+    res.json({
+      ...student.toObject(),
+      internships
+    });
+  } catch (error) {
+    console.error('[Students] Detail error', error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-// In your studentRoutes.js file
-router.get("/", authMiddleware, async (req, res) => {
-    try {
-      const students = await Student.find().select("name rollNo email");
-      res.json(students);
-    } catch (error) {
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-// Add new student (Admin Only)
+// POST /api/students - create (admin only)
 router.post("/", authMiddleware, async (req, res) => {
-    if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
-
-    try {
-        const student = new Student(req.body);
-        await student.save();
-        res.json(student);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
-    }
+  if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
+  try {
+    const { skills, cgpa, ...rest } = req.body;
+    const student = new Student({ ...rest, cgpa, skills: Array.isArray(skills) ? skills : (skills ? skills.split(',').map(s => s.trim()).filter(Boolean) : []) });
+    await student.save();
+    res.status(201).json(student);
+  } catch (error) {
+    console.error('[Students] Create error', error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-// In your studentRoutes.js backend file
-router.get("/:id", authMiddleware, async (req, res) => {
-    try {
-      // Find the student
-      const student = await Student.findById(req.params.id);
-      if (!student) return res.status(404).json({ message: "Student not found" });
-      
-      // Find related internships
-      const internships = await Internship.find({ studentId: req.params.id });
-      
-      // Include internships in the student response
-      const studentWithInternships = {
-        ...student.toObject(),
-        internships: internships
-      };
-      
-      res.json(studentWithInternships);
-    } catch (error) {
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// PUT /api/students/:id - update
+router.put("/:id", authMiddleware, async (req, res) => {
+  try {
+    const { skills, cgpa, ...rest } = req.body;
+    const update = { ...rest };
+    if (cgpa !== undefined) update.cgpa = cgpa;
+    if (skills !== undefined) update.skills = Array.isArray(skills) ? skills : skills.split(',').map(s => s.trim()).filter(Boolean);
+    const student = await Student.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!student) return res.status(404).json({ message: "Student not found" });
+    res.json(student);
+  } catch (error) {
+    console.error('[Students] Update error', error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// DELETE /api/students/:id - delete (admin only)
+router.delete("/:id", authMiddleware, async (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
+  try {
+    const deleted = await Student.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Student not found" });
+    res.json({ message: 'Deleted' });
+  } catch (error) {
+    console.error('[Students] Delete error', error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;

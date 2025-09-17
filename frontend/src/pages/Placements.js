@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getPlacements, getPlacementStatistics } from "../api/api";
+import { getPlacements, getPlacementStatistics } from "../api";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { Link } from "react-router-dom";
@@ -202,321 +202,205 @@ export default function Placements() {
       <div className="w-full">
         <Navbar />
         <div className="p-6">
-<div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-  <h1 className="text-2xl font-bold mb-4 md:mb-0">Placement Reports</h1>
-  
-  {/* Replace the button group with this improved version */}
-  <div className="flex flex-wrap gap-2">
-    <button 
-      onClick={() => setViewMode(viewMode === 'table' ? 'charts' : 'table')}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition flex items-center"
-    >
-      <FaChartBar className="mr-1" /> 
-      {viewMode === 'table' ? 'Charts' : 'Table'}
-    </button>
-    
-    {user?.role === "admin" && (
-      <button 
-        onClick={() => navigate('/add-placement')}
-        className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition flex items-center"
-      >
-        <FaPlus className="mr-1" /> Add
-      </button>
-    )}
-    
-    <button 
-      onClick={exportToCSV}
-      className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded transition flex items-center"
-    >
-      <FaFileExcel className="mr-1" /> Export
-    </button>
-    
-    <button 
-      onClick={clearFilters}
-      className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded transition flex items-center"
-    >
-      <FaFilter className="mr-1" /> Filters
-    </button>
-  </div>
-</div>
-
-          {/* Summary Statistics */}
-          {statistics && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold">Total Placements</h3>
-                <p className="text-3xl mt-2">{statistics.totalPlacements}</p>
-              </div>
-              <div className="bg-gradient-to-r from-green-600 to-green-800 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold">Average Package</h3>
-                <p className="text-3xl mt-2">₹{statistics.avgPackage} LPA</p>
-              </div>
-              <div className="bg-gradient-to-r from-purple-600 to-purple-800 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold">Highest Package</h3>
-                <p className="text-3xl mt-2">₹{statistics.highestPackage} LPA</p>
-              </div>
-              <div className="bg-gradient-to-r from-yellow-600 to-yellow-800 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold">Placement Rate</h3>
-                <p className="text-3xl mt-2">{statistics.placementRate}%</p>
-              </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-cyan-300 to-emerald-300">Placements Overview</h1>
+              <p className="text-sm text-gray-400 mt-1">Explore placement outcomes, trends, and distributions with interactive views.</p>
             </div>
-          )}
-
-          {/* Filters */}
-          <div className="bg-gray-800 p-4 rounded-lg mb-6">
-            <h2 className="text-lg font-semibold mb-3">Filter Placements</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Company</label>
-                <input
-                  type="text"
-                  name="company"
-                  placeholder="Filter by company"
-                  value={filters.company}
-                  onChange={handleFilterChange}
-                  className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Department</label>
-                <input
-                  type="text"
-                  name="department"
-                  placeholder="Filter by department"
-                  value={filters.department}
-                  onChange={handleFilterChange}
-                  className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Year</label>
-                <select
-                  name="year"
-                  value={filters.year}
-                  onChange={handleFilterChange}
-                  className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Package Above (LPA)</label>
-                <input
-                  type="number"
-                  name="packageAbove"
-                  placeholder="Min package"
-                  value={filters.packageAbove}
-                  onChange={handleFilterChange}
-                  className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => setViewMode(viewMode === 'table' ? 'charts' : 'table')} className="px-4 py-2 rounded-lg bg-blue-600/80 hover:bg-blue-500 border border-blue-400/40 text-sm font-medium shadow-sm flex items-center gap-2 transition"><FaChartBar /> {viewMode === 'table' ? 'Charts View' : 'Table View'}</button>
+              {user?.role === "admin" && (
+                <button onClick={() => navigate('/add-placement')} className="px-4 py-2 rounded-lg bg-green-600/80 hover:bg-green-500 border border-green-400/40 text-sm font-medium shadow-sm flex items-center gap-2 transition"><FaPlus /> Add</button>
+              )}
+              <button onClick={exportToCSV} className="px-4 py-2 rounded-lg bg-purple-600/80 hover:bg-purple-500 border border-purple-400/40 text-sm font-medium shadow-sm flex items-center gap-2 transition"><FaFileExcel /> Export</button>
+              <button onClick={clearFilters} className="px-4 py-2 rounded-lg bg-gray-700/70 hover:bg-gray-600/70 border border-gray-500/40 text-sm font-medium shadow-sm flex items-center gap-2 transition"><FaFilter /> Reset Filters</button>
             </div>
           </div>
 
-          {/* Content - Table or Charts */}
-          {loading ? (
-            <div className="text-center py-10">
-              <p className="text-xl">Loading placement data...</p>
-            </div>
-          ) : error ? (
-            <div className="bg-red-700 text-white p-4 rounded-lg">
-              <p>Error: {error}</p>
-            </div>
-          ) : viewMode === 'table' ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-gray-800 rounded-lg overflow-hidden">
-                <thead>
-                  <tr className="bg-gray-700">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Student Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Roll No
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Department
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Company
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Package (LPA)
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Offer Letter
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-600">
-                  {filteredPlacements.length > 0 ? (
-                    filteredPlacements.map((placement) => (
-                      <tr key={placement._id} className="hover:bg-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Link 
-                            to={`/student/${placement.student?._id}`}
-                            className="text-blue-400 hover:underline"
-                          >
-                            {placement.student?.name || 'N/A'}
-                          </Link>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {placement.student?.rollNo || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {placement.student?.department || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {placement.company}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {placement.package}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {new Date(placement.placementDate).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {placement.offerLetter ? (
-                            <a 
-                              href={`http://localhost:5000/${placement.offerLetter}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-blue-400 hover:underline flex items-center"
-                            >
-                              <FaFilePdf className="mr-1" /> View
-                            </a>
-                          ) : (
-                            <span className="text-gray-400">Not Available</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="7" className="px-6 py-4 text-center">
-                        No placement records found matching the selected filters.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            /* Charts View */
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {/* Placement Trend Chart */}
-                <div className="bg-gray-800 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4">Placements Trend ({filters.year})</h3>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={chartData.trendData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                        <XAxis dataKey="month" stroke="#aaa" />
-                        <YAxis stroke="#aaa" />
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#333', borderColor: '#555' }}
-                          labelStyle={{ color: '#fff' }}
-                        />
-                        <Legend />
-                        <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={2} activeDot={{ r: 8 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-                
-                {/* Package Range Distribution */}
-                <div className="bg-gray-800 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4">Package Distribution</h3>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData.packageRanges}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                        <XAxis dataKey="range" stroke="#aaa" />
-                        <YAxis stroke="#aaa" />
-                        <Tooltip
-                          contentStyle={{ backgroundColor: '#333', borderColor: '#555' }}
-                          labelStyle={{ color: '#fff' }}
-                        />
-                        <Legend />
-                        <Bar dataKey="count" name="Students" fill="#82ca9d" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {/* Company Distribution */}
-                <div className="bg-gray-800 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4">Top Recruiting Companies</h3>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData.companyChartData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {chartData.companyChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#333', borderColor: '#555' }}
-                        />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-                
-                {/* Department Distribution */}
-                <div className="bg-gray-800 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4">Department-wise Placements</h3>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData.departmentChartData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {chartData.departmentChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#333', borderColor: '#555' }}
-                        />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
+          {statistics && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <StatCard title="Total Placements" value={statistics.totalPlacements} gradient="from-blue-600/80 to-indigo-600/80" />
+              <StatCard title="Avg Package (LPA)" value={`₹${statistics.avgPackage}`} gradient="from-emerald-600/80 to-teal-600/80" />
+              <StatCard title="Highest Package" value={`₹${statistics.highestPackage}`} gradient="from-fuchsia-600/80 to-pink-600/80" />
+              <StatCard title="Placement Rate" value={`${statistics.placementRate}%`} gradient="from-amber-500/80 to-orange-600/80" />
             </div>
           )}
+
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_18rem] gap-6 items-start">
+            <div className="space-y-8">
+              <div className="rounded-2xl border border-gray-600/40 bg-gray-800/50 backdrop-blur-xl p-5 shadow-lg">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-300 mb-4 flex items-center gap-2"><FaFilter className="text-teal-300" /> Filters</h2>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                  <FilterInput label="Company" name="company" value={filters.company} onChange={handleFilterChange} placeholder="e.g., Google" />
+                  <FilterInput label="Department" name="department" value={filters.department} onChange={handleFilterChange} placeholder="e.g., CSE" />
+                  <div>
+                    <label className="block text-xs font-medium mb-1 tracking-wide text-gray-300">Year</label>
+                    <select name="year" value={filters.year} onChange={handleFilterChange} className="w-full rounded-md px-3 py-2 bg-gray-900/60 border border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                      <option value="2025">2025</option>
+                      <option value="2024">2024</option>
+                      <option value="2023">2023</option>
+                      <option value="2022">2022</option>
+                    </select>
+                  </div>
+                  <FilterInput type="number" label="Package ≥ (LPA)" name="packageAbove" value={filters.packageAbove} onChange={handleFilterChange} placeholder="Min" />
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="rounded-2xl border border-gray-600/40 bg-gray-800/50 backdrop-blur-xl p-10 text-center text-gray-300">Loading placement data...</div>
+              ) : error ? (
+                <div className="rounded-2xl border border-red-500/40 bg-red-800/40 backdrop-blur-xl p-6 text-sm">Error: {error}</div>
+              ) : viewMode === 'table' ? (
+                <div className="rounded-2xl border border-gray-600/40 bg-gray-900/50 backdrop-blur-xl p-0 overflow-hidden shadow">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead className="bg-gray-800/70">
+                        <tr className="text-xs uppercase tracking-wide text-gray-300">
+                          <Th>Student Name</Th>
+                          <Th>Roll No</Th>
+                          <Th>Department</Th>
+                          <Th>Company</Th>
+                          <Th>Package (LPA)</Th>
+                          <Th>Date</Th>
+                          <Th>Offer Letter</Th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700/60">
+                        {filteredPlacements.length ? filteredPlacements.map(placement => (
+                          <tr key={placement._id} className="hover:bg-gray-800/60 transition">
+                            <Td><Link to={`/student/${placement.student?._id}`} className="text-indigo-300 hover:text-indigo-200 hover:underline">{placement.student?.name || 'N/A'}</Link></Td>
+                            <Td>{placement.student?.rollNo || 'N/A'}</Td>
+                            <Td>{placement.student?.department || 'N/A'}</Td>
+                            <Td className="font-medium text-gray-100">{placement.company}</Td>
+                            <Td className="text-emerald-300 font-semibold">{placement.package}</Td>
+                            <Td>{new Date(placement.placementDate).toLocaleDateString()}</Td>
+                            <Td>{placement.offerLetter ? <a href={`http://localhost:5000/${placement.offerLetter}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-300 hover:text-blue-200"><FaFilePdf className="text-sm" />View</a> : <span className="text-gray-500">N/A</span>}</Td>
+                          </tr>
+                        )) : (
+                          <tr><td colSpan="7" className="py-8 text-center text-gray-400">No placement records match filters.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <ChartPanel title={`Placements Trend (${filters.year})`}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={chartData.trendData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis dataKey="month" stroke="#9ca3af" />
+                          <YAxis stroke="#9ca3af" />
+                          <Tooltip contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151' }} labelStyle={{ color: '#fff' }} />
+                          <Legend />
+                          <Line type="monotone" dataKey="count" stroke="#60a5fa" strokeWidth={2} activeDot={{ r: 7 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </ChartPanel>
+                    <ChartPanel title="Package Distribution">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData.packageRanges}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis dataKey="range" stroke="#9ca3af" />
+                          <YAxis stroke="#9ca3af" />
+                          <Tooltip contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151' }} labelStyle={{ color: '#fff' }} />
+                          <Legend />
+                          <Bar dataKey="count" name="Students" fill="#34d399" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartPanel>
+                  </div>
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <ChartPanel title="Top Recruiting Companies">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={chartData.companyChartData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label={({name, percent}) => `${name}: ${(percent*100).toFixed(0)}%`}>
+                            {chartData.companyChartData.map((entry,index)=>(<Cell key={index} fill={COLORS[index % COLORS.length]} />))}
+                          </Pie>
+                          <Tooltip contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151' }} />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </ChartPanel>
+                    <ChartPanel title="Department-wise Placements">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={chartData.departmentChartData} cx="50%" cy="50%" outerRadius={80} fill="#6366f1" dataKey="value" label={({name, percent}) => `${name}: ${(percent*100).toFixed(0)}%`}>
+                            {chartData.departmentChartData.map((entry,index)=>(<Cell key={index} fill={COLORS[index % COLORS.length]} />))}
+                          </Pie>
+                          <Tooltip contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151' }} />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </ChartPanel>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Sticky Rail */}
+            <div className="hidden xl:block">
+              <div className="sticky top-32 space-y-6">
+                <div className="rounded-2xl border border-gray-600/40 bg-gray-800/50 backdrop-blur-xl p-5 shadow-lg text-[11px] text-gray-300">
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-200 mb-3 flex items-center gap-2"><FaChartBar className="text-sky-300" /> Insights</h3>
+                  <ul className="space-y-2 leading-snug">
+                    <li>Switch between table and charts for different analytical perspectives.</li>
+                    <li>Use filters to isolate cohorts or performance tiers.</li>
+                    <li>Export filtered dataset for offline analysis.</li>
+                  </ul>
+                </div>
+                {!filteredPlacements.length && !loading && (
+                  <div className="rounded-2xl border border-yellow-500/40 bg-yellow-800/30 backdrop-blur-xl p-5 shadow-lg text-[11px] text-yellow-100">
+                    <h3 className="text-sm font-semibold mb-2">No Results Tip</h3>
+                    <p>Broaden filters or clear them to restore the full dataset.</p>
+                  </div>
+                )}
+                <div className="rounded-2xl border border-gray-600/40 bg-gradient-to-br from-indigo-800/40 via-purple-800/30 to-fuchsia-800/30 backdrop-blur-xl p-5 shadow-lg text-[11px] text-gray-300">
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-200 mb-3">Suggestions</h3>
+                  <ul className="space-y-2 leading-snug">
+                    <li>Add advanced filters (range slider for package).</li>
+                    <li>Introduce company logos for visual recall.</li>
+                    <li>Drill-down view with student placement timelines.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+// --- Presentational Helpers ---
+function StatCard({ title, value, gradient }) {
+  return (
+    <div className={`relative group rounded-2xl border border-gray-600/40 bg-gradient-to-br ${gradient} backdrop-blur-xl p-4 shadow-lg overflow-hidden`}>      
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-br from-white/10 via-transparent to-white/0" />
+      <p className="text-[11px] uppercase tracking-wide text-gray-200/90 font-medium">{title}</p>
+      <p className="text-2xl font-bold mt-1">{value}</p>
+    </div>
+  );
+}
+
+function FilterInput({ label, name, value, onChange, placeholder, type='text' }) {
+  return (
+    <div>
+      <label className="block text-xs font-medium mb-1 tracking-wide text-gray-300">{label}</label>
+      <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className="w-full rounded-md px-3 py-2 bg-gray-900/60 border border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm placeholder-gray-500" />
+    </div>
+  );
+}
+
+function ChartPanel({ title, children }) {
+  return (
+    <div className="rounded-2xl border border-gray-600/40 bg-gray-800/50 backdrop-blur-xl p-5 shadow-lg h-80">
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-300 mb-3">{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function Th({ children }) { return <th className="px-5 py-3 text-left">{children}</th>; }
+function Td({ children }) { return <td className="px-5 py-3 whitespace-nowrap text-sm">{children}</td>; }

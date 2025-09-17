@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
-import { getLORById } from '../api/api';
+import { getLORById } from '../api';
 import { FaFileAlt, FaUser, FaBuilding, FaGraduationCap, FaCalendar } from 'react-icons/fa';
 
 export default function LORDetail() {
