@@ -4,17 +4,18 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { addInternship, getStudentById } from "../api";
 
-export default function AddInternship() {
-  const { studentId } = useParams();
+export default function AddInternship({ studentId: propStudentId }) {
+  const { studentId: paramStudentId } = useParams();
+  const studentId = propStudentId || paramStudentId || "";
   const [formData, setFormData] = useState({
-    studentId: studentId || "",
+    studentId: studentId,
     company: "",
     position: "",
     startDate: "",
     endDate: "",
     description: "",
     stipend: "",
-    status: "Applied"
+    status: "Applied",
   });
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,29 +24,28 @@ export default function AddInternship() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in and is an admin
     const storedUser = JSON.parse(localStorage.getItem("user"));
     setUser(storedUser);
-    
-    // Redirect if user is not admin
+
     if (!storedUser || storedUser.role !== "admin") {
       setMessage("Access denied. Admin privileges required.");
-      setTimeout(() => navigate("/dashboard"), 2000);
+      if (!propStudentId) {
+        setTimeout(() => navigate("/dashboard"), 2000);
+      }
       return;
     }
 
-    // If studentId is provided in the URL, fetch student details
     if (studentId) {
       fetchStudentDetails();
     }
-  }, [navigate, studentId]);
+  }, [navigate, studentId, propStudentId]);
 
   const fetchStudentDetails = async () => {
     try {
       setLoading(true);
       const response = await getStudentById(studentId);
       setStudent(response.data);
-      setFormData(prev => ({ ...prev, studentId }));
+      setFormData((prev) => ({ ...prev, studentId }));
       setLoading(false);
     } catch (error) {
       setMessage("Error fetching student details");
@@ -64,26 +64,27 @@ export default function AddInternship() {
       setLoading(true);
       await addInternship(formData);
       setMessage("Internship added successfully!");
-      setTimeout(() => navigate(`/student/${studentId}`), 2000);
       setLoading(false);
+      if (!propStudentId) {
+        setTimeout(() => navigate(`/student/${studentId}`), 2000);
+      }
     } catch (error) {
       setMessage(error.response?.data?.message || "An error occurred");
       setLoading(false);
     }
   };
 
-  // Don't render form if not admin
   if (!user || user.role !== "admin") {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-        <Sidebar />
+        {!propStudentId && <Sidebar />}
         <div className="w-full">
-          <Navbar />
+          {!propStudentId && <Navbar />}
           <div className="p-6">
             <div className="bg-red-600 text-white p-4 rounded-lg">
               <h1 className="text-2xl font-bold">Access Denied</h1>
               <p>You need administrator privileges to access this page.</p>
-              <p>Redirecting to dashboard...</p>
+              {!propStudentId && <p>Redirecting to dashboard...</p>}
             </div>
           </div>
         </div>
@@ -92,25 +93,34 @@ export default function AddInternship() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      <Sidebar />
+    <div
+      className={`flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white ${
+        propStudentId ? "" : ""
+      }`}
+    >
+      {!propStudentId && <Sidebar />}
       <div className="w-full">
-        <Navbar />
+        {!propStudentId && <Navbar />}
         <div className="p-6">
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
             <h1 className="text-2xl font-bold mb-4">
               Add Internship {student ? `for ${student.name}` : ""}
             </h1>
             {message && (
-              <p className={`p-3 rounded mb-4 ${message.includes('success') ? 'bg-green-600' : 'bg-red-600'}`}>
+              <p
+                className={`p-3 rounded mb-4 ${
+                  message.includes("success") ? "bg-green-600" : "bg-red-600"
+                }`}
+              >
                 {message}
               </p>
             )}
-            
             <form onSubmit={handleSubmit} className="space-y-4">
               {!studentId && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">Student ID</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Student ID
+                  </label>
                   <input
                     type="text"
                     name="studentId"
@@ -122,9 +132,10 @@ export default function AddInternship() {
                   />
                 </div>
               )}
-              
               <div>
-                <label className="block text-sm font-medium mb-1">Company</label>
+                <label className="block text-sm font-medium mb-1">
+                  Company
+                </label>
                 <input
                   type="text"
                   name="company"
@@ -135,9 +146,10 @@ export default function AddInternship() {
                   required
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium mb-1">Position</label>
+                <label className="block text-sm font-medium mb-1">
+                  Position
+                </label>
                 <input
                   type="text"
                   name="position"
@@ -148,9 +160,10 @@ export default function AddInternship() {
                   required
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium mb-1">Start Date</label>
+                <label className="block text-sm font-medium mb-1">
+                  Start Date
+                </label>
                 <input
                   type="date"
                   name="startDate"
@@ -160,9 +173,10 @@ export default function AddInternship() {
                   required
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium mb-1">End Date (Optional)</label>
+                <label className="block text-sm font-medium mb-1">
+                  End Date (Optional)
+                </label>
                 <input
                   type="date"
                   name="endDate"
@@ -171,9 +185,10 @@ export default function AddInternship() {
                   className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label className="block text-sm font-medium mb-1">
+                  Description
+                </label>
                 <textarea
                   name="description"
                   placeholder="Enter internship description"
@@ -183,9 +198,10 @@ export default function AddInternship() {
                   className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium mb-1">Stipend (Optional)</label>
+                <label className="block text-sm font-medium mb-1">
+                  Stipend (Optional)
+                </label>
                 <input
                   type="number"
                   name="stipend"
@@ -195,7 +211,6 @@ export default function AddInternship() {
                   className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
               <div>
                 <label className="block text-sm font-medium mb-1">Status</label>
                 <select
@@ -211,9 +226,8 @@ export default function AddInternship() {
                   <option value="Terminated">Terminated</option>
                 </select>
               </div>
-              
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition duration-200"
                 disabled={loading}
               >
